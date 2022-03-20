@@ -50,8 +50,7 @@ with mp_hands.Hands(
 cap = cv2.VideoCapture(0) #cv2.VideoCapture(0) starts webcam 0 
 positions = []
 with mp_hands.Hands(
-    model_complexity=0,
-    min_detection_confidence=0.5,
+    min_detection_confidence=0.8,
     min_tracking_confidence=0.5) as hands:
   while cap.isOpened(): #loop for each frame
     success, image = cap.read()
