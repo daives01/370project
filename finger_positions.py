@@ -1,11 +1,17 @@
 # https://google.github.io/mediapipe/solutions/hands.html for indices
-from math import sqrt
+from math import sqrt, atan, pi
 
 
 def calcDistance(start, finish):
     base = abs(start.x - finish.x)
     height = abs(start.y - finish.y)
     return sqrt(base ** 2 + height ** 2)
+
+
+def calcAngle(start, finish):
+    base = abs(start.x - finish.x)
+    height = abs(start.y - finish.y)
+    return atan(base / height)
 
 
 def detectFingers(hand):  # return an array of 4 booleans, from index finger to pinky, 1 is down, 0 is up
@@ -35,7 +41,8 @@ def detectFist(hand):  # position exists if fingers are in fist position (Thumb 
                           hand.landmark[12].y > hand.landmark[11].y > hand.landmark[10].y,
                           hand.landmark[16].y > hand.landmark[15].y > hand.landmark[14].y,
                           hand.landmark[20].y > hand.landmark[19].y > hand.landmark[18].y]
-    return all(fingersClosed) and all(fingersPointedDown)
+    goodKnuckleAngle = calcAngle(hand.landmark[5], hand.landmark[17]) > (pi / 3)
+    return all(fingersClosed) and all(fingersPointedDown) and goodKnuckleAngle
 
 
 def detectThumbsUp(hand):  # position exists if thumb is pointing up and other fingers are closed
@@ -46,8 +53,8 @@ def detectThumbsUp(hand):  # position exists if thumb is pointing up and other f
 
 def detectThumbsDown(hand):  # position exists if thumb is pointing down and other fingers are closed
     isThumbDown = hand.landmark[4].y > hand.landmark[3].y > hand.landmark[5].y > hand.landmark[0].y
-    fingers = detectFingers(hand)
-    return isThumbDown and all(fingers)
+    fingersClosed = detectFingers(hand)
+    return isThumbDown and all(fingersClosed)
 
 
 def detectPosition(hand, label):
