@@ -1,5 +1,5 @@
-# https://google.github.io/mediapipe/solutions/hands.html for indices
 from math import sqrt, atan, pi
+# https://google.github.io/mediapipe/solutions/hands.html for indices
 
 
 def calcDistance(start, finish):
@@ -25,46 +25,82 @@ def detectFingers(hand):  # return an array of 4 booleans, from index finger to 
     return [isIndexClosed, isMiddleClosed, isRingClosed, isPinkyClosed]
 
 
-def detectOpenHand(hand):  # position exists if all fingers are open and pointed up
-    fingersClosed = detectFingers(hand)
+def detectOpenHand(hand, fingers):  # position exists if all fingers are open and pointed up
     fingersPointedUp = [hand.landmark[4].y < hand.landmark[3].y < hand.landmark[2].y,
                         hand.landmark[8].y < hand.landmark[7].y < hand.landmark[6].y,
                         hand.landmark[12].y < hand.landmark[11].y < hand.landmark[10].y,
                         hand.landmark[16].y < hand.landmark[15].y < hand.landmark[14].y,
                         hand.landmark[20].y < hand.landmark[19].y < hand.landmark[18].y]
-    return not any(fingersClosed) and all(fingersPointedUp)
+    return not any(fingers) and all(fingersPointedUp)
 
 
-def detectFist(hand):  # position exists if fingers are in fist position (Thumb placement is not considered)
-    fingersClosed = detectFingers(hand)
+def detectFist(hand, fingers):  # position exists if fingers are in fist position (Thumb placement is not considered)
     fingersPointedDown = [hand.landmark[8].y > hand.landmark[7].y > hand.landmark[6].y,
                           hand.landmark[12].y > hand.landmark[11].y > hand.landmark[10].y,
                           hand.landmark[16].y > hand.landmark[15].y > hand.landmark[14].y,
                           hand.landmark[20].y > hand.landmark[19].y > hand.landmark[18].y]
-    goodKnuckleAngle = calcAngle(hand.landmark[5], hand.landmark[17]) > (pi / 3)
-    return all(fingersClosed) and all(fingersPointedDown) and goodKnuckleAngle
+    goodKnuckleAngle = calcAngle(hand.landmark[5], hand.landmark[17]) > (pi / 4)
+    return all(fingers) and all(fingersPointedDown) and goodKnuckleAngle
 
 
-def detectThumbsUp(hand):  # position exists if thumb is pointing up and other fingers are closed
+def detectThumbsUp(hand, fingers):  # position exists if thumb is pointing up and other fingers are closed
     isThumbUp = hand.landmark[4].y < hand.landmark[3].y < hand.landmark[5].y < hand.landmark[0].y
-    fingersClosed = detectFingers(hand)
-    return isThumbUp and all(fingersClosed)
+    goodKnuckleAngle = calcAngle(hand.landmark[5], hand.landmark[17]) < (pi / 4)
+    return isThumbUp and all(fingers) and goodKnuckleAngle
 
 
-def detectThumbsDown(hand):  # position exists if thumb is pointing down and other fingers are closed
+def detectThumbsDown(hand, fingers):  # position exists if thumb is pointing down and other fingers are closed
     isThumbDown = hand.landmark[4].y > hand.landmark[3].y > hand.landmark[5].y > hand.landmark[0].y
+    goodKnuckleAngle = calcAngle(hand.landmark[5], hand.landmark[17]) < (pi / 4)
+    return isThumbDown and all(fingers) and goodKnuckleAngle
+
+
+def detectPointUp(hand, fingers):  # position exists if index points straight up and other fingers are closed
+    indexPointingUp = hand.landmark[8].y < hand.landmark[7].y < hand.landmark[6].y \
+                        < hand.landmark[5].y < hand.landmark[0].y
+    straightIndex = calcAngle(hand.landmark[6], hand.landmark[8]) < (pi / 6)
+    return indexPointingUp and straightIndex and fingers[1] and fingers[2] and fingers[3]
+
+
+def detectPointDown(hand, fingers):  # position exists if index points straight down and other fingers are closed
+    indexPointingDown = hand.landmark[8].y > hand.landmark[7].y > hand.landmark[6].y \
+                        > hand.landmark[5].y > hand.landmark[0].y
+    straightIndex = calcAngle(hand.landmark[6], hand.landmark[8]) < (pi / 6)
+    return indexPointingDown and straightIndex and fingers[1] and fingers[2] and fingers[3]
+
+
+def detectPointLeft(hand, fingers):  # position exists if index points straight to the left and other fingers are closed
+    indexPointingLeft = hand.landmark[8].x > hand.landmark[7].x > hand.landmark[6].x \
+                        > hand.landmark[5].x > hand.landmark[0].x
+    straightIndex = calcAngle(hand.landmark[6], hand.landmark[8]) > (pi / 3)
+    return indexPointingLeft and straightIndex and fingers[1] and fingers[2] and fingers[3]
+
+
+def detectPointRight(hand, fingers):  # position exists if index points straight to the right and other fingers are closed
+    indexPointingRight = hand.landmark[8].x < hand.landmark[7].x < hand.landmark[6].x \
+                        < hand.landmark[5].x < hand.landmark[0].x
+    straightIndex = calcAngle(hand.landmark[6], hand.landmark[8]) > (pi / 3)
+    return indexPointingRight and straightIndex and fingers[1] and fingers[2] and fingers[3]
+
+
+def detectPosition(hand, label):    # change position to first detected position
     fingersClosed = detectFingers(hand)
-    return isThumbDown and all(fingersClosed)
-
-
-def detectPosition(hand, label):
-    if detectOpenHand(hand):
+    if detectOpenHand(hand, fingersClosed):
         return "Open Hand"
-    elif detectFist(hand):
+    elif detectFist(hand, fingersClosed):
         return "Fist"
-    elif detectThumbsUp(hand):
+    elif detectThumbsUp(hand, fingersClosed):
         return "Thumbs Up"
-    elif detectThumbsDown(hand):
+    elif detectThumbsDown(hand, fingersClosed):
         return "Thumbs Down"
+    elif detectPointUp(hand, fingersClosed):
+        return "Point Up"
+    elif detectPointDown(hand, fingersClosed):
+        return "Point Down"
+    elif detectPointLeft(hand, fingersClosed):
+        return "Point Left"
+    elif detectPointRight(hand, fingersClosed):
+        return "Point Right"
     else:
         return "None Detected"
+
