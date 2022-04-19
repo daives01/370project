@@ -83,6 +83,13 @@ def detectPointRight(hand, fingers):  # position exists if index points straight
     return indexPointingRight and straightIndex and fingers[1] and fingers[2] and fingers[3]
 
 
+def detectMiddleFinger(hand, fingers): # lol
+    middlePointingUp = hand.landmark[12].y < hand.landmark[11].y < hand.landmark[10].y \
+                        < hand.landmark[9].y < hand.landmark[0].y
+    straightMiddle = calcAngle(hand.landmark[10], hand.landmark[12]) < (pi / 6)
+    return middlePointingUp and straightMiddle and fingers[0] and fingers[2] and fingers[3]
+
+
 def detectPosition(hand, label):    # change position to first detected position
     fingersClosed = detectFingers(hand)
     if detectOpenHand(hand, fingersClosed):
@@ -101,6 +108,7 @@ def detectPosition(hand, label):    # change position to first detected position
         return "Point Left"
     elif detectPointRight(hand, fingersClosed):
         return "Point Right"
+    elif detectMiddleFinger(hand, fingersClosed):
+        return "Lol"
     else:
         return "None Detected"
-
