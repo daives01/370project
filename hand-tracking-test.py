@@ -47,42 +47,43 @@ with mp_hands.Hands(
         hand_world_landmarks, mp_hands.HAND_CONNECTIONS, azimuth=5)
 
 # For webcam input:3
-cap = cv2.VideoCapture(0) #cv2.VideoCapture(0) starts webcam 0 
-positions = []
+cap = cv2.VideoCapture(0)  # cv2.VideoCapture(0) starts webcam 0
+hand_position = "None Detected"
 with mp_hands.Hands(
-    max_num_hands = 1,
-    min_detection_confidence=0.8,
-    min_tracking_confidence=0.5) as hands:
-  while cap.isOpened(): #loop for each frame
-    success, image = cap.read()
-    if not success:
-      print("Ignoring empty camera frame.")
-      # If loading a video, use 'break' instead of 'continue'.
-      continue
+        max_num_hands=1,
+        min_detection_confidence=0.8,
+        min_tracking_confidence=0.5) as hands:
+    while cap.isOpened():  # loop for each frame
+        success, image = cap.read()
+        if not success:
+            print("Ignoring empty camera frame.")
+            # If loading a video, use 'break' instead of 'continue'.
+            continue
 
-    # To improve performance, optionally mark the image as not writeable to
-    # pass by reference.
-    image.flags.writeable = False
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-    results = hands.process(image)
+        # To improve performance, optionally mark the image as not writeable to
+        # pass by reference.
+        image.flags.writeable = False
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+        results = hands.process(image)
 
-    # Draw the hand annotations on the image.
-    image.flags.writeable = True
-    image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
-    if results.multi_hand_landmarks:
-      for hand_landmarks in results.multi_hand_landmarks:
-        oldPos = positions 
-        positions = finger_positions.detectFingers(hand_landmarks, results.multi_handedness[0].classification[0].label) #THIS ONLY SUPPORTS 1 HAND AT A TIME
-        if (oldPos != positions):
-          print(positions)
-        mp_drawing.draw_landmarks(
-            image,
-            hand_landmarks,
-            mp_hands.HAND_CONNECTIONS,
-            mp_drawing_styles.get_default_hand_landmarks_style(),
-            mp_drawing_styles.get_default_hand_connections_style())
-    # Flip the image horizontally for a selfie-view display.
-    cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
-    if cv2.waitKey(5) & 0xFF == 27:
-      break
+        # Draw the hand annotations on the image.
+        image.flags.writeable = True
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+        if results.multi_hand_landmarks:
+            for hand_landmarks in results.multi_hand_landmarks:
+                old_hand_position = hand_position
+                hand_position = finger_positions.detectPosition(hand_landmarks, results.multi_handedness[0]
+                                                                .classification[0].label)
+                if old_hand_position != hand_position:
+                    print(hand_position)
+                mp_drawing.draw_landmarks(
+                    image,
+                    hand_landmarks,
+                    mp_hands.HAND_CONNECTIONS,
+                    mp_drawing_styles.get_default_hand_landmarks_style(),
+                    mp_drawing_styles.get_default_hand_connections_style())
+        # Flip the image horizontally for a selfie-view display.
+        cv2.imshow('MediaPipe Hands', cv2.flip(image, 1))
+        if cv2.waitKey(5) & 0xFF == 27:
+            break
 cap.release()
