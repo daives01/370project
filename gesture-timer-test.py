@@ -1,10 +1,3 @@
-import finger_positions 
-import cv2
-import mediapipe as mp
-mp_drawing = mp.solutions.drawing_utils
-mp_drawing_styles = mp.solutions.drawing_styles
-mp_hands = mp.solutions.hands
-
 import finger_positions
 import cv2
 import mediapipe as mp
@@ -46,7 +39,7 @@ with mp_hands.Hands(
                     if count > delay:  # needed for option 2 below
                         continue
                     count += 1
-                    print(count)
+                    #print(count)
                     if count == delay:
                         print(latest_gesture)  # Eventually will be ExecuteCommand(), or something like that
                         # We have two choices right here:
@@ -69,3 +62,4 @@ with mp_hands.Hands(
         if cv2.waitKey(5) & 0xFF == 27:
             break
 cap.release()
+
