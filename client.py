@@ -1,6 +1,4 @@
 import socket
-import sys
-import time
 from pynput.keyboard import Key, Controller
 
 def executeCommand(msg, keyboard):
@@ -28,28 +26,33 @@ def executeCommand(msg, keyboard):
             keyboard.type("Hey!")
 
 
+def main(): 
+    IP = "192.168.0.121"
+    PORT = "6900"
+    keyboard = Controller()
+    HEADERSIZE = 8
 
-keyboard = Controller()
-HEADERSIZE = 8
+    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    s.connect((IP, PORT))
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-s.connect(("192.168.50.170", 4202))
-
-while True:
-    full_msg = ''
-    new_msg = True
     while True:
-        msg = s.recv(128)
-        print(msg)
-        if new_msg:
-            msglen = int(msg[:HEADERSIZE])
-            new_msg = False
-        full_msg += msg.decode("utf-8")
+        full_msg = ''
+        new_msg = True
+        while True:
+            msg = s.recv(128)
+            print(msg)
+            if new_msg:
+                msglen = int(msg[:HEADERSIZE])
+                new_msg = False
+            full_msg += msg.decode("utf-8")
 
-        if len(full_msg)-HEADERSIZE == msglen:
-            gesture = full_msg[HEADERSIZE:]
-            print(gesture)
-            if (gesture != "None Detected"):
-                executeCommand(gesture, keyboard)
-            new_msg = True
-            full_msg = ""
+            if len(full_msg)-HEADERSIZE == msglen:
+                gesture = full_msg[HEADERSIZE:]
+                print(gesture)
+                if (gesture != "None Detected"):
+                    executeCommand(gesture, keyboard)
+                new_msg = True
+                full_msg = ""
+
+if __name__ == "__main__":
+    main()
