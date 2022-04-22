@@ -28,7 +28,7 @@ def executeCommand(msg, keyboard):
 
 def main(): 
     IP = "192.168.0.121"
-    PORT = "6900"
+    PORT = 6900
     keyboard = Controller()
     HEADERSIZE = 8
 

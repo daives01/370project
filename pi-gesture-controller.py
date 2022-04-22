@@ -7,7 +7,7 @@ import mediapipe as mp
 
 def main():
     IP = "192.168.0.121"
-    PORT = "6900"
+    PORT = 6900
     # Set up socket
     clientsocket = None
     try:
@@ -88,3 +88,7 @@ def main():
         clientsocket.close()
         cap.release()
         sys.exit()
+
+
+if __name__ == "__main__":
+    main()
