@@ -10,21 +10,30 @@ def executeCommand(msg, keyboard):
         case "Fist":
             keyboard.tap(Key.media_volume_mute)
         case "Thumbs Up":
+            keyboard.tap(Key.up) #youtube volume up
+            keyboard.press(Key.ctrl_l) #spotify volume up
+            keyboard.tap(Key.up)
+            keyboard.release(Key.ctrl_l)
+        case "Thumbs Down":
+            keyboard.tap(Key.down) #youtube volume down 
+            keyboard.press(Key.ctrl_l) #spotify volume down
+            keyboard.tap(Key.down)
+            keyboard.release(Key.ctrl_l)
+        case "Point Up":
             for i in range (volume_amt):
                 keyboard.tap(Key.media_volume_up)
-        case "Thumbs Down":
+        case "Point Down":
             for i in range (volume_amt):
                 keyboard.tap(Key.media_volume_down)
-        case "Point Up":
-            keyboard.tap(Key.up)
-        case "Point Down":
-            keyboard.tap(Key.down)
         case "Point Left":
             keyboard.tap(Key.media_previous)
         case "Point Right":
             keyboard.tap(Key.media_next)
         case "Lol":
-            keyboard.type("Hey!")
+            keyboard.press(Key.alt)
+            keyboard.press(Key.f4)
+            keyboard.release(Key.alt)
+            keyboard.release(Key.f4)
 
 
 def main(): 
